@@ -8,15 +8,25 @@ plt.rcParams['font.size'] = 8
 plt.rcParams['font.family'] = ['serif']
 
 parser = argparse.ArgumentParser(description='Accepts .csv files and returns basic LaTex template with generated graphs.')
+
 parser.add_argument(
-  "-f",
+  "-fp",
   "--filepath",
   required = True, 
   type     = str,
   nargs    = '+',
-  dest     = 'csvFiles',
-  help     = '[REQUIRED] relative path to .csv file(s) to be read',
+  dest     = "csvFiles",
+  help     = "[REQUIRED] relative path to .csv file(s) to be read",
 )
+
+parser.add_argument(
+  "-d",
+  "--directory",
+  action = "store_true",
+  dest   = "readFromDir",
+  help   = "[DIRNAME/*] if specified, filepath will be read as directory and all elements will be read"
+)
+
 args = parser.parse_args()
 
 def GenerateGraph(path):
@@ -49,10 +59,15 @@ latexOutro = '\n\end{document}'
 file = open("generatedTex.tex", "w")
 file.write(latexHeader)
 
-for path in args.csvFiles:
-  #GenerateGraph(path)
-  print("PATH: " + path)
-  GenerateTexFigure(path)
+if (not args.readFromDir):
+  for path in args.csvFiles:
+    #GenerateGraph(path)
+    print("PATH: " + path)
+    GenerateTexFigure(path)
+else:
+  for path in sorted(glob.glob(args.csvFiles[0])):
+    print("PATH: " + path)
+    GenerateTexFigure(path)
 
 file.write(latexOutro)
 file.close()
