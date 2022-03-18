@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import glob
 import argparse
 
+from soupsieve import match
+
 plt.style.use('seaborn-white')
 plt.rcParams['font.size'] = 8
 plt.rcParams['font.family'] = ['serif']
@@ -27,6 +29,23 @@ parser.add_argument(
   help   = "[DIRNAME/*] if specified, filepath will be read as directory and all elements will be read"
 )
 
+parser.add_argument(
+  "-s",
+  "--xyscale",
+  dest    = "xyscale",
+  default = "axis",
+  choices = ["axis", "semilogyaxis", "semilogxaxis", "loglogaxis"],
+  help    = "sets the scale for xy-axis on generated graph"
+)
+
+parser.add_argument(
+  "-n",
+  "--newfile",
+  action = "store_true",
+  dest   = "newfile",
+  help   = "creates new file, with header/outro"
+)
+
 args = parser.parse_args()
 
 def GenerateGraph(path):
@@ -34,8 +53,8 @@ def GenerateGraph(path):
   df.index.name = "entrada"
   df.columns = ["op."]
   fig, ax = plt.subplots()
-  ax.set_yscale("linear")
-  ax.set_xscale("linear")
+  ax.set_yscale(args.yscale)
+  ax.set_xscale(args.xscale)
   ax.plot(df, linestyle='--', marker='+', color='red')
   ax.grid()
   ax.set(xlabel='Valor de entrada', ylabel='N° de operações',title=path[14:-4])
@@ -46,15 +65,20 @@ def GenerateTexFigure(path):
   tuples = [tuple(row) for row in df.values]
   coord = ''.join(str(tuples))[1:-1].replace("), ",")")
   file.write(latexFig.format(tikzpicture='tikzpicture',
-                      axis='axis',
-                      TITLE=path[14:-4],
+                      axis=args.xyscale,
+                      TITLE=path,
                       COORDINATES=coord))
 
 latexFig = open('resources/latexFig.txt', 'r')
 latexFig = latexFig.read()
-latexHeader = open('resources/latexHeader.txt')
-latexHeader = latexHeader.read()
-latexOutro = '\n\end{document}'
+
+if(args.newfile): 
+  latexHeader = open('resources/latexHeader.txt')
+  latexHeader = latexHeader.read()
+  latexOutro = '\n\end{document}'
+else:
+  latexHeader = ''
+  latexOutro = ''
 
 file = open("generatedTex.tex", "w")
 file.write(latexHeader)
