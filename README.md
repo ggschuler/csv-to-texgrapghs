@@ -1,4 +1,4 @@
-# csv-to-texgrapghs
+# CSV to TeX graphs.
 Script for converting .csv data to .tex graph/figure templates. Script should be executed with optional paraments:
 
 optional arguments:
